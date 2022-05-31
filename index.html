@@ -109,7 +109,7 @@
 		}
 		//駅情報取得
 		function getSta(id, lat, lon) {
-			urlSta = "http://api.ekispert.jp//v1/json/geo/station?key=LE_ZM9XgRBBa6LZt&geoPoint=" + lat + "," + lon;
+			urlSta = "https://api.ekispert.jp//v1/json/geo/station?key=LE_ZM9XgRBBa6LZt&geoPoint=" + lat + "," + lon;
 			fetch(urlSta, {
 				method: "GET"
 			}).then(response => response.json())
