@@ -5,11 +5,6 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<!--
-	<script type="text/javascript" src="expGuiStation/expGuiStation.js?key=LE_ZM9XgRBBa6LZt" charset="UTF-8"></script>
-	<link class="css" rel="stylesheet" type="text/css" href="expGuiStation/expCss/expGuiStation.css">
-	-->
-
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
 	<script>
 		const pcode = 43; // Kumamoto prefecture code / 熊本県の都道府県コード
@@ -22,7 +17,7 @@
 			'430040': { 'lat': 32.252365, 'lng': 130.651207 }, '430010': { 'lat': 32.803216, 'lng': 130.707937 },
 			'430030': { 'lat': 32.299155, 'lng': 130.493076 }, '430020': { 'lat': 32.952121, 'lng': 131.121196 }
 		};
-		let idSelctor, idWeather; // ready for grobal variables / グローバル変数にするため用意
+		let idSelctor, idWeather, idSta; // ready for grobal variables / グローバル変数にするため用意
 
 		/**
 		 * This function will be done just after loading contents. / HTMLが読み込まれてから開始される処理
@@ -30,6 +25,8 @@
 		document.addEventListener("DOMContentLoaded", function () {
 			idSelctor = document.getElementById("itemSelector"); // dom id for region selector / 地域選択メニューのid
 			idWeather = document.getElementById("weather"); // dom id for show weather / 天気予報を書き込む場所のid
+			idSta = document.getElementById("station"); //追加．駅を書き込む場所のid
+
 			// get regional codes corresponfing to pcode and recontruct regional selector / 都道府県コードに対応する地域コードを取得し地域コードセレクタを再構築
 			getRcodes(pcode);
 			// Add function to the region selector. / 地域セレクタの選択が変更されたときの動作
@@ -37,7 +34,6 @@
 				let rcode = this.value; // selected region code / 選択された地域コード
 				console.log(rcode);
 				getForecast(rcode);
-				getSta(rcode);
 			});
 		});
 
@@ -55,7 +51,7 @@
 					data.offices[pcode + "0000"].children.forEach(function (code) { // code = member of pcode
 						idSelctor.insertAdjacentHTML("beforeend", '<option value="' + code + '">' + data.class10s[code].name + '</option>');
 					});
-					getForecast(idSelctor.value); // get forecast data at first time / 初回天気予報データ所得
+					getForecast(idSelctor.value); // get forecast data at first time / 初回天気予報データ取得
 				});
 		}
 
@@ -87,6 +83,7 @@
 						idWeather.insertAdjacentHTML("beforeend", "</div>\n</div>\n");
 						let s = date.split(/[-T]/);
 						getSun("acc" + index, s[0], s[1], s[2], geo[rcode].lat, geo[rcode].lng);
+						getSta("acc" + index, geo[rcode].lat, geo[rcode].lng);
 					})
 				});
 		}
@@ -111,21 +108,15 @@
 				});
 		}
 		//駅情報取得
-		function getSta(rcode) {
-			urlSta = "http://api.ekispert.jp//v1/json/geo/station?key=LE_ZM9XgRBBa6LZt&geoPoint="
-				+ geo[rcode].lat + "," + geo[rcode].lng;
-			fetch({
+		function getSta(id, lat, lon) {
+			urlSta = "http://api.ekispert.jp//v1/json/geo/station?key=LE_ZM9XgRBBa6LZt&geoPoint=" + lat + "," + lon;
+			fetch(urlSta, {
 				method: "GET"
 			}).then(response => response.json())
 				.then(data => {
-					idSta.innerHTML = ""
-					data.forEach(data => {
-						console.log("[getSta] data=" + JSON.stringify(data));
-						idSta.insertAdjacentHTML("beforeend",
-							"選択地点の最寄り駅: " + (new Date(data.results) + "\n"));
-
-					});
-
+					console.log("[getSta] data=" + JSON.stringify(data));
+					document.getElementById(id).insertAdjacentHTML("beforeend",
+						"<br>\n選択地点の最寄り駅：" + data.ResultSet.Point.Station.Name + "駅" + "\n");
 				});
 		}
 	</script>
@@ -137,47 +128,51 @@
 	</style>
 </head>
 <body>
-<header>
-  <div class="navbar navbar-dark bg-dark shadow-sm">
-    <div class="container">
-      <div class="navbar-brand">
-        <strong>
-      		Mash-up Sample (Forecast and Sunrise/Sunset)<br />マッシュアップの例 (天気予報と日の出/入)
-        </strong>
-      </div>
-    </div>
-  </div>
-</header>
-<blockquote class="text-end">
-	2022-05-25 (since 2014-01-25), by <a href="mailto:nakano@cc.kumamoto-u.ac.jp?subject=mashup20220525">nakano@cc.kumamoto-u.ac.jp</a>
-</blockquote>
-<strong>This sample receives data from different two external servers and shows forecast and sunrise/sunset time
- of Kumamoto region, using the following two RESTful services (Web API).</strong><br />
-<span style="color:red">2022-05-25: </span>
-Stop to use JSONP and start to use bootstrap instead of jQuery and jQueryMobile, 
-and change WebAPI site from "www.drk7.jp" to "www.jma.go.jp". <br />
-<span style="color:red">2021-05-27: </span>
-There was a change with "www.drk7.jp" and latitude and longitude could not be obtained. 
-Not good, but it is written directly in the code.<br />
-<strong>外部サーバから直接データを受け取って、熊本県の天気予報と日の出日の入りの時刻を表示します。
-実際には、以下の２つのサーバのRESTサービス(Web API)を利用しています。</strong><br />
-<span style="color:red">2022-05-25: </span>
-JSONPの利用停止。jQuery,jQueryMobileの代わりにbootstrao使用。WebAPIを「www.drk7.jp」から「www.jma.go.jp」に変更。<br />
-<span style="color:red">2021-05-27: </span>
-「www.drk7.jp」が変更になり、緯度経度が取得できなくなったため、良くないが直接コーディングしている。
+	<header>
+		<div class="navbar navbar-dark bg-dark shadow-sm">
+			<div class="container">
+				<div class="navbar-brand">
+					<strong>
+						Mash-up Sample (Forecast and Sunrise/Sunset)<br />マッシュアップの例 (天気予報と日の出/入)
+					</strong>
+				</div>
+			</div>
+		</div>
+	</header>
+	<blockquote class="text-end">
+		2022-05-25 (since 2014-01-25), by <a href="mailto:nakano@cc.kumamoto-u.ac.jp?subject=mashup20220525">nakano@cc.kumamoto-u.ac.jp</a>
+	</blockquote>
+	<strong>
+		This sample receives data from different two external servers and shows forecast and sunrise/sunset time
+		of Kumamoto region, using the following two RESTful services (Web API).
+	</strong><br />
+	<span style="color:red">2022-05-25: </span>
+	Stop to use JSONP and start to use bootstrap instead of jQuery and jQueryMobile,
+	and change WebAPI site from "www.drk7.jp" to "www.jma.go.jp". <br />
+	<span style="color:red">2021-05-27: </span>
+	There was a change with "www.drk7.jp" and latitude and longitude could not be obtained.
+	Not good, but it is written directly in the code.<br />
+	<strong>
+		外部サーバから直接データを受け取って、熊本県の天気予報と日の出日の入りの時刻を表示します。
+		実際には、以下の２つのサーバのRESTサービス(Web API)を利用しています。
+	</strong><br />
+	<span style="color:red">2022-05-25: </span>
+	JSONPの利用停止。jQuery,jQueryMobileの代わりにbootstrao使用。WebAPIを「www.drk7.jp」から「www.jma.go.jp」に変更。<br />
+	<span style="color:red">2021-05-27: </span>
+	「www.drk7.jp」が変更になり、緯度経度が取得できなくなったため、良くないが直接コーディングしている。
 
-<ul>
-	<li><a target="_blank" href="https://mindtech.jp/?p=1754">JSON data from the new JMA / 新しい気象庁サイトからJSONデータが取得できる件</a></li>
-	<li><a target="_blank" href=" https://sunrise-sunset.org/api">Sunrize Sunset Calculation / 日の出日の入り計算</a></li>
-</ul>
-  
-<div class="form-floating">   
-	<select class="form-select" aria-label="select a region" id="itemSelector"></select>
-	<label for="floatingSelect">Region (地域):</label>
-</div>
-	
-<div id="weather" class="accordion"></div>
+	<ul>
+		<li><a target="_blank" href="https://mindtech.jp/?p=1754">JSON data from the new JMA / 新しい気象庁サイトからJSONデータが取得できる件</a></li>
+		<li><a target="_blank" href=" https://sunrise-sunset.org/api">Sunrize Sunset Calculation / 日の出日の入り計算</a></li>
+	</ul>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+	<div class="form-floating">
+		<select class="form-select" aria-label="select a region" id="itemSelector"></select>
+		<label for="floatingSelect">Region (地域):</label>
+	</div>
+
+	<div id="weather" class="accordion"></div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 </body>
 </html>
