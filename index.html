@@ -9,7 +9,7 @@
 		const pcode = 43; // Kumamoto prefecture code / 熊本県の都道府県コード
 		const urlRcode = "https://www.jma.go.jp/bosai/common/const/area.json";
 		const urlForecast = "https://www.jma.go.jp/bosai/forecast/data/forecast/" + pcode + "0000.json";
-		// No good, but directory coded (cannot find resonable api)/ よくないが、直接緯度経度をコーディング (APIが見つからない)
+		// No good, but directory coded (cannot find resonable api)/ APIがないので緯度経度は直接記述
 		//const geo = {'球磨地方':{'lat':32.252365,'lng':130.651207}, '熊本地方':{'lat':32.803216,'lng':130.707937},
 		//		'天草・芦北地方':{'lat':32.299155,'lng':130.493076}, '阿蘇地方':{'lat':32.952121,'lng':131.121196}};
 		const geo = {
@@ -24,7 +24,7 @@
 		document.addEventListener("DOMContentLoaded", function () {
 			idSelctor = document.getElementById("itemSelector"); // dom id for region selector / 地域選択メニューのid
 			idWeather = document.getElementById("weather"); // dom id for show weather / 天気予報を書き込む場所のid
-			idSta = document.getElementById("station"); //追加．駅を書き込む場所のid
+			idSta = document.getElementById("station"); //駅を書き込む場所のid
 
 			// get regional codes corresponfing to pcode and recontruct regional selector / 都道府県コードに対応する地域コードを取得し地域コードセレクタを再構築
 			getRcodes(pcode);
@@ -131,42 +131,16 @@
 
 		<div class="navbar sticky-top navbar-dark bg-dark">
 		<div class="container-fluid">
-			<div class="navbar-brand">Mashup example<br />マッシュアップの例</div>
+			<div class="navbar-brand">Weather forcast for Kumamoto<br />熊本の各地域の天気予報</div>
 		</div>
 	</div>
-		<!--
-	</header>
-	
-	
-	<strong>
-		This sample receives data from different two external servers and shows forecast and sunrise/sunset time
-		of Kumamoto region, using the following two RESTful services (Web API).-->
-		<!--
-	</strong><br />
-	<span style="color:red">2022-05-25: </span>
-	Stop to use JSONP and start to use bootstrap instead of jQuery and jQueryMobile,
-	and change WebAPI site from "www.drk7.jp" to "www.jma.go.jp". <br />
-	<span style="color:red">2021-05-27: </span>
-	There was a change with "www.drk7.jp" and latitude and longitude could not be obtained.
-	Not good, but it is written directly in the code.<br />
-	-->
+		
 	<strong>
 	<br />
 		外部サーバから直接データを受け取って，熊本県の天気予報と日の出/日の入り時刻，観測地点の最寄り駅を表示します．3つのサーバのWeb APIを利用しています．
 		<br />
 	</strong><br />
-	<!--
-	<span style="color:red">2022-05-25: </span>
-	JSONPの利用停止。jQuery,jQueryMobileの代わりにbootstrao使用。WebAPIを「www.drk7.jp」から「www.jma.go.jp」に変更。<br />
-	<span style="color:red">2021-05-27: </span>
-	「www.drk7.jp」が変更になり、緯度経度が取得できなくなったため、良くないが直接コーディングしている。
-	
 
-	<ul>
-		<li><a target="_blank" href="https://mindtech.jp/?p=1754">JSON data from the new JMA / 新しい気象庁サイトからJSONデータが取得できる件</a></li>
-		<li><a target="_blank" href=" https://sunrise-sunset.org/api">Sunrize Sunset Calculation / 日の出日の入り計算</a></li>
-	</ul>
-	-->
 	<div class="form-floating">
 		<select class="form-select" aria-label="select a region" id="itemSelector"></select>
 		<label for="floatingSelect">Region (地域):</label>
